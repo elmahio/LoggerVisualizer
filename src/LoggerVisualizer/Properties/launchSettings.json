@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "LoggerVisualizer": {
+      "commandName": "Project",
+      "commandLineArgs": "/Exp root"
+    }
+  }
+}

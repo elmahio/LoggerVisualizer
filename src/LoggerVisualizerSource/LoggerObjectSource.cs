@@ -1,0 +1,167 @@
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.DebuggerVisualizers;
+using System;
+using System.IO;
+using System.Reflection;
+
+namespace LoggerVisualizerSource
+{
+    public class LoggerObjectSource : VisualizerObjectSource
+    {
+        public override void GetData(object target, Stream outgoingData)
+        {
+            if (target.GetType().IsGenericType && target.GetType().GetGenericTypeDefinition() == typeof(Logger<>))
+            {
+                var logger = GetPrivateField(target, "_logger") as ILogger;
+                if (logger?.GetType().FullName != "Microsoft.Extensions.Logging.Logger") return;
+
+                var loggers = GetPublicProperty(logger, "Loggers") as Array;
+                var messageLoggers = GetPublicProperty(logger, "MessageLoggers") as Array;
+
+                // Microsoft.Extensions.Loggging 8 has the name in _categoryName
+                var name = GetPrivateField(logger, "_categoryName")?.ToString();
+
+                var minLevel = (CalculateEnabledLogLevel(logger) ?? LogLevel.None).ToString();
+                var enabled = (minLevel != null).ToString();
+
+                var result = new LoggerModel
+                {
+                    Name = name,
+                    MinLevel = minLevel,
+                    Enabled = enabled,
+                    Loggers = new System.Collections.Generic.List<Logger>()
+                };
+                foreach (var l in loggers)
+                {
+                    // If name was not resolved from _categoryName use the Category property from the first logger
+                    if (string.IsNullOrWhiteSpace(result.Name))
+                    {
+                        result.Name = GetPublicProperty(l, "Category")?.ToString();
+                    }
+                    var providerTypeValue = GetPublicProperty(l, "ProviderType") as Type;
+                    var internalLogger = GetPublicProperty(l, "Logger") as ILogger;
+                    var messageLogger = FirstOrNull(messageLoggers, internalLogger);
+                    Logger loggerModel = new Logger
+                    {
+                        Name = providerTypeValue.FullName,
+                        ExternalScope = GetPublicProperty(l, "ExternalScope").ToString(),
+                        MinLevel = (GetPublicProperty(messageLogger, "MinLevel") ?? LogLevel.None).ToString(),
+                    };
+
+                    switch (providerTypeValue.FullName)
+                    {
+                        case "Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider":
+                            {
+                                var options = GetNonPublicProperty(internalLogger, "Options");
+                                loggerModel.FormatterName = GetPublicProperty(options, "FormatterName")?.ToString();
+                                loggerModel.TimestampFormat = GetPublicProperty(options, "TimestampFormat")?.ToString();
+                                loggerModel.QueueFullMode = GetPublicProperty(options, "QueueFullMode")?.ToString();
+                                loggerModel.DisableColors = GetPublicProperty(options, "DisableColors")?.ToString();
+                                loggerModel.LogToStandardErrorThreshold = GetPublicProperty(options, "LogToStandardErrorThreshold")?.ToString();
+                                loggerModel.MaxQueueLength = GetPublicProperty(options, "MaxQueueLength")?.ToString();
+                                loggerModel.UseUtcTimestamp = GetPublicProperty(options, "UseUtcTimestamp")?.ToString();
+                                break;
+                            }
+                        case "Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider":
+                            {
+                                var settings = GetPrivateField(internalLogger, "_settings");
+                                loggerModel.LogName = GetPublicProperty(settings, "LogName")?.ToString();
+                                loggerModel.MachineName = GetPublicProperty(settings, "MachineName")?.ToString();
+                                loggerModel.SourceName = GetPublicProperty(settings, "SourceName")?.ToString();
+                                break;
+                            }
+                        case "Elmah.Io.Extensions.Logging.ElmahIoLoggerProvider":
+                            {
+                                var options = GetPrivateField(internalLogger, "_options");
+                                loggerModel.ApiKey = GetPublicProperty(options, "ApiKey")?.ToString();
+                                var logId = GetPublicProperty(options, "LogId") as Guid?;
+                                loggerModel.LogId = logId == Guid.Empty ? "" : logId?.ToString();
+                                break;
+                            }
+                    }
+
+                    result.Loggers.Add(loggerModel);
+                }
+
+                SerializeAsJson(outgoingData, result);
+            }
+        }
+
+        static object FirstOrNull(Array messageLoggers, ILogger logger)
+        {
+            if (messageLoggers is null || messageLoggers.Length == 0)
+            {
+                return null;
+            }
+
+            foreach (object item in messageLoggers)
+            {
+                var theLogger = GetPublicProperty(item, "Logger") as ILogger;
+                if (theLogger == logger)
+                {
+                    return item;
+                }
+            }
+
+            return null;
+        }
+
+        private static LogLevel? CalculateEnabledLogLevel(ILogger logger)
+        {
+            if (logger == null)
+            {
+                return null;
+            }
+
+            var logLevels = new ReadOnlySpan<LogLevel>(new LogLevel[]
+            {
+                LogLevel.Critical,
+                LogLevel.Error,
+                LogLevel.Warning,
+                LogLevel.Information,
+                LogLevel.Debug,
+                LogLevel.Trace,
+            });
+
+            LogLevel? minimumLevel = null;
+
+            // Check log level from highest to lowest. Report the lowest log level.
+            foreach (LogLevel logLevel in logLevels)
+            {
+                if (!logger.IsEnabled(logLevel))
+                {
+                    break;
+                }
+
+                minimumLevel = logLevel;
+            }
+
+            return minimumLevel;
+        }
+
+        private static object GetPublicProperty(object obj, string name)
+        {
+            var propertyInfo = obj.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance);
+            if (propertyInfo == null) return null;
+            var theValue = propertyInfo.GetValue(obj);
+            return theValue;
+        }
+
+        private static object GetNonPublicProperty(object obj, string name)
+        {
+            var propertyInfo = obj.GetType().GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (propertyInfo == null) return null;
+            var theValue = propertyInfo.GetValue(obj);
+            return theValue;
+        }
+
+        private static object GetPrivateField(object obj, string name)
+        {
+            FieldInfo fieldInfo = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (fieldInfo == null) return null;
+            var theValue = fieldInfo.GetValue(obj);
+            return theValue;
+        }
+
+    }
+}

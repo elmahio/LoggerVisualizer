@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <RestoreAdditionalProjectSources>https://pkgs.dev.azure.com/azure-public/vside/_packaging/msft_consumption/nuget/v3/index.json;$(RestoreAdditionalProjectSources)</RestoreAdditionalProjectSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Elmah.Io.Client" Version="5.1.76" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Extensibility.Sdk" Version="17.9.2092" />
+    <PackageReference Include="Microsoft.VisualStudio.Extensibility.Build" Version="17.9.2092" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LoggerVisualizerSource\LoggerVisualizerSource.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Page Remove="LoggerVisualizerUserControl.xaml" />
+		<EmbeddedResource Include="LoggerVisualizerUserControl.xaml" LogicalName="$(RootNamespace).LoggerVisualizerUserControl.xaml" />
+		<Content Include="..\LoggerVisualizerSource\bin\$(Configuration)\netstandard2.0\LoggerVisualizerSource.dll" Link="netstandard2.0\LoggerVisualizerSource.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Include="bin\$(Configuration)\net8.0-windows\Microsoft.Extensions.Logging.dll" Link="netstandard2.0\Microsoft.Extensions.Logging.dll">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+
+</Project>
