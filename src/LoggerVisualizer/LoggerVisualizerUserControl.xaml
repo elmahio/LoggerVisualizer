@@ -2,7 +2,8 @@
 			  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
               xmlns:styles="clr-namespace:Microsoft.VisualStudio.Shell;assembly=Microsoft.VisualStudio.Shell.15.0"
               xmlns:colors="clr-namespace:Microsoft.VisualStudio.PlatformUI;assembly=Microsoft.VisualStudio.Shell.15.0"
-              xmlns:sys="clr-namespace:System;assembly=mscorlib">
+              xmlns:sys="clr-namespace:System;assembly=mscorlib"
+              xmlns:vs="http://schemas.microsoft.com/visualstudio/extensibility/2022/xaml">
 	<Grid>
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="70"></ColumnDefinition>
@@ -30,7 +31,10 @@
             <TabControl.ItemTemplate>
                 <!-- Template for the tab headers -->
                 <DataTemplate>
-                    <TextBlock Text="{Binding ShortName}" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <vs:Image Source="KnownMonikers.ClearWindowContent" />
+                        <TextBlock Text="{Binding ShortName}" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                    </StackPanel>
                 </DataTemplate>
             </TabControl.ItemTemplate>
 
@@ -83,8 +87,18 @@
                         <!-- EventSource -->
                         <TextBlock Grid.Row="3" Grid.Column="0" Text="Actions:" Visibility="{Binding IsEventSource}" Margin="0"/>
                         <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" Visibility="{Binding IsEventSource}" Orientation="Horizontal" Margin="0,3,0,0">
-                            <Button Command="{Binding ProcessLauncher}" CommandParameter="eventvwr.msc" Content="🔎 Event Viewer" Width="120"/>
-                            <Button Command="{Binding ProcessLauncher}" CommandParameter="perfmon.exe" Content="🔎 Performance Monitor" Width="160" Margin="3,0,0,0"/>
+                            <Button Command="{Binding ProcessLauncher}" CommandParameter="eventvwr.msc" Width="120">
+                                <StackPanel Orientation="Horizontal">
+                                    <vs:Image Source="KnownMonikers.Search" />
+                                    <TextBlock Text="Event Viewer" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding ProcessLauncher}" CommandParameter="perfmon.exe" Width="160" Margin="3,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <vs:Image Source="KnownMonikers.Search" />
+                                    <TextBlock Text="Performance Monitor" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
 
                         <!-- EventLog -->
@@ -96,7 +110,12 @@
                         <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding LogName}" Visibility="{Binding IsEventLog}"/>
                         <TextBlock Grid.Row="6" Grid.Column="0" Text="Actions:" Visibility="{Binding IsEventLog}"/>
                         <StackPanel Grid.Row="6" Grid.Column="1" Margin="0" HorizontalAlignment="Left" Visibility="{Binding IsEventLog}" Orientation="Horizontal">
-                            <Button Command="{Binding ProcessLauncher}" CommandParameter="eventvwr.msc" Content="🔎 Event Viewer" Width="120"/>
+                            <Button Command="{Binding ProcessLauncher}" CommandParameter="eventvwr.msc" Width="120">
+                                <StackPanel Orientation="Horizontal">
+                                    <vs:Image Source="KnownMonikers.Search" />
+                                    <TextBlock Text="Event Viewer" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
 
                         <!-- ElmahIo -->
@@ -106,8 +125,18 @@
                         <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding LogId}" Visibility="{Binding IsElmahIo}"/>
                         <TextBlock Grid.Row="5" Grid.Column="0" Text="Actions:" Visibility="{Binding IsElmahIo}"/>
                         <StackPanel Grid.Row="5" Grid.Column="1" Margin="0" HorizontalAlignment="Left" Visibility="{Binding IsElmahIo}" Orientation="Horizontal">
-                            <Button Command="{Binding Browse}" CommandParameter="{Binding}" Content="🔎 Browse" Width="80" IsEnabled="{Binding CanBrowse}"/>
-                            <Button Command="{Binding Diagnose}" CommandParameter="{Binding}" Content="🧑🏼‍⚕️ Diagnose" Width="90" Margin="3,0,0,0" IsEnabled="{Binding CanDiagnose}"/>
+                            <Button Command="{Binding Browse}" CommandParameter="{Binding}" Width="80" IsEnabled="{Binding CanBrowse}">
+                                <StackPanel Orientation="Horizontal">
+                                    <vs:Image Source="KnownMonikers.Search" />
+                                    <TextBlock Text="Browse" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding Diagnose}" CommandParameter="{Binding}" Width="90" Margin="3,0,0,0" IsEnabled="{Binding CanDiagnose}">
+                                <StackPanel Orientation="Horizontal">
+                                    <vs:Image Source="KnownMonikers.StatusOKNew" />
+                                    <TextBlock Text="Diagnose" VerticalAlignment="Center" Margin="5,0,0,0"/>
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

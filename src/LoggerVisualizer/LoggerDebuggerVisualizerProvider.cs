@@ -50,7 +50,7 @@ namespace LoggerVisualizer
                     ExternalScope = l.ExternalScope,
                     MinLevel = l.MinLevel,
                     MinLevelColor = MinLevelColor(l.MinLevel),
-                    ShortName = "📄 " + l.Name[(1 + l.Name.LastIndexOf('.'))..].Replace("LoggerProvider", string.Empty),
+                    ShortName = l.Name[(1 + l.Name.LastIndexOf('.'))..].Replace("LoggerProvider", string.Empty),
                     // Console
                     IsConsole = l.Name == "Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider" ? Visibility.Visible : Visibility.Collapsed,
                     FormatterName = l.FormatterName,
