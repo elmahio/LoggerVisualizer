@@ -1,5 +1,4 @@
-Logger Visualizer
-====================
+# <img src="src/LoggerVisualizerVsix/icon.png" style="height: 1em; width: 1em;"> Logger Visualizer ![Build](https://github.com/elmahio/LoggerVisualizer/actions/workflows/dotnet.yml/badge.svg)
 
 Logger Debug Visualizer for Visual Studio.
 
