@@ -11,9 +11,13 @@ namespace LoggerVisualizer
             Metadata = new(
                 id: "LoggerVisualizer",
                 version: this.ExtensionAssemblyVersion,
-                publisherName: "elmah.io",
+                publisherName: "elmahio",
                 displayName: "ILogger Debugger Visualizer Extension",
-                description:"djlkæjklæ"),
+                description: "Logger Debug Visualizer for Visual Studio.")
+            {
+                Tags = ["visualizer", "logging", "logger", "ilogger", "debug", "debugging"],
+                Icon = "icon.png",
+            }
         };
 
         /// <inheritdoc />

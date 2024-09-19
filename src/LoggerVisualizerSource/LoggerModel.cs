@@ -16,7 +16,7 @@ namespace LoggerVisualizerSource
         public string MinLevel { get; set; }
 
         [DataMember]
-        public List<Logger> Loggers { get; set; } = new List<Logger>();
+        public List<Logger> Loggers { get; set; } = [];
     }
 
     [DataContract]
@@ -34,16 +34,22 @@ namespace LoggerVisualizerSource
         #region Console
         [DataMember]
         public string FormatterName { get; set; }
+
         [DataMember]
         public string DisableColors { get; set; }
+
         [DataMember]
         public string LogToStandardErrorThreshold { get; set; }
+
         [DataMember]
         public string MaxQueueLength { get; set; }
+
         [DataMember]
         public string QueueFullMode { get; set; }
+
         [DataMember]
         public string TimestampFormat { get; set; }
+
         [DataMember]
         public string UseUtcTimestamp { get; set; }
         #endregion
@@ -51,8 +57,10 @@ namespace LoggerVisualizerSource
         #region EventLog
         [DataMember]
         public string MachineName { get; set; }
+
         [DataMember]
         public string SourceName { get; set; }
+
         [DataMember]
         public string LogName { get; set; }
         #endregion

@@ -10,7 +10,7 @@ namespace LoggerVisualizer
     /// </summary>
     public static class Telemetry
     {
-        private static IElmahioAPI elmahIoClient;
+        private static IElmahioAPI? elmahIoClient;
 
         public static bool Enabled { get; set; }
 
@@ -49,10 +49,10 @@ namespace LoggerVisualizer
                     User = WindowsIdentity.GetCurrent().Name,
                     Hostname = Hostname(),
                     Application = "Exception Visualizer",
-                    ServerVariables = new List<Item>
-                    {
-                        new Item("User-Agent", $"X-ELMAHIO-APPLICATION; OS=Windows; OSVERSION={Environment.OSVersion.Version}; ENGINE=VisualStudio"),
-                    }
+                    ServerVariables =
+                    [
+                        new("User-Agent", $"X-ELMAHIO-APPLICATION; OS=Windows; OSVERSION={Environment.OSVersion.Version}; ENGINE=VisualStudio"),
+                    ]
                 };
 
                 elmahIoClient.Messages.CreateAndNotify(new Guid("934272cb-2133-4fa7-b2b6-3113cb0b272b"), createMessage);
@@ -75,7 +75,7 @@ namespace LoggerVisualizer
             return items;
         }
 
-        private static string Hostname()
+        private static string? Hostname()
         {
             var machineName = Environment.MachineName;
             if (!string.IsNullOrWhiteSpace(machineName)) return machineName;

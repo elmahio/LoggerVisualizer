@@ -19,9 +19,9 @@ jobs:
       uses: microsoft/setup-msbuild@v2
     - name: Update version
       run: |
-        (Get-Content -Path src\LoggerVisualizerVsix\source.extension.vsixmanifest) |
-          ForEach-Object {$_ -Replace '0.1.0', '0.1.${{ github.run_number }}'} |
-            Set-Content -Path src\LoggerVisualizerVsix\source.extension.vsixmanifest
+        (Get-Content -Path src\LoggerVisualizer\LoggerVisualizer.csproj) |
+          ForEach-Object {$_ -Replace '<AssemblyVersion>0.1.0</AssemblyVersion>', '<AssemblyVersion>0.1.${{ github.run_number }}</AssemblyVersion>'} |
+            Set-Content -Path src\LoggerVisualizer\LoggerVisualizer.csproj
     - name: Restore
       run: nuget restore
     - name: Build
@@ -29,7 +29,7 @@ jobs:
     - uses: actions/upload-artifact@v3
       with:
         name: LoggerVisualizer.vsix
-        path: src\LoggerVisualizerVsix\bin\Release\net8.0-windows\LoggerVisualizerVsix.vsix
+        path: src\LoggerVisualizer\bin\Release\net8.0-windows\LoggerVisualizer.vsix
     - name: Create Release
       id: create_release
       if: ${{ github.event_name == 'push' }}
@@ -47,6 +47,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: src\LoggerVisualizerVsix\bin\Release\net8.0-windows\LoggerVisualizerVsix.vsix
-        asset_name: LoggerVisualizerVsix.vsix
+        asset_path: src\LoggerVisualizer\bin\Release\net8.0-windows\LoggerVisualizer.vsix
+        asset_name: LoggerVisualizer.vsix
         asset_content_type: application/zip

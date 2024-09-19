@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using LoggerVisualizerSource;
 using System.Collections.ObjectModel;
 using LoggerVisualizer.Models;
-using System.Windows.Media.Imaging;
 using System.Windows;
 
 namespace LoggerVisualizer
@@ -13,13 +12,14 @@ namespace LoggerVisualizer
     [VisualStudioContribution]
     internal class LoggerDebuggerVisualizerProvider : DebuggerVisualizerProvider
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ConstantExpressionEvaluator", "CEE0027:String not localized", Justification = "")]
         public override DebuggerVisualizerProviderConfiguration DebuggerVisualizerProviderConfiguration => new("Logger Visualizer", typeof(Logger<>))
         {
             VisualizerObjectSourceType = new(typeof(LoggerObjectSource)),
         };
         public override async Task<IRemoteUserControl> CreateVisualizerAsync(VisualizerTarget visualizerTarget, CancellationToken cancellationToken)
         {
-            LoggerModel? model = null;
+            LoggerModel? model;
             try
             {
                 model = await visualizerTarget
@@ -35,7 +35,7 @@ namespace LoggerVisualizer
             return await Task.FromResult<IRemoteUserControl>(new LoggerVisualizerUserControl(ToViewModel(model)));
         }
 
-        private LoggerRootViewModel ToViewModel(LoggerModel logger)
+        private LoggerRootViewModel? ToViewModel(LoggerModel? logger)
         {
             if (logger == null) return null;
             var viewModel = new LoggerRootViewModel

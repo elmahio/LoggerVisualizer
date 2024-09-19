@@ -11,7 +11,7 @@ namespace LoggerVisualizer
 {
     internal class LoggerVisualizerUserControl : RemoteUserControl
     {
-        public LoggerVisualizerUserControl(LoggerRootViewModel model) : base(model)
+        public LoggerVisualizerUserControl(LoggerRootViewModel? model) : base(model)
         {
         }
     }

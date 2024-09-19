@@ -1,22 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-  </PropertyGroup>
+	<PropertyGroup>
+		<AssemblyVersion>0.1.0</AssemblyVersion>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<LangVersion>12</LangVersion>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Elmah.Io.Client" Version="5.1.76" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Extensibility.Sdk" Version="17.11.40261" />
-    <PackageReference Include="Microsoft.VisualStudio.Extensibility.Build" Version="17.11.40261" />
-  </ItemGroup>
+	<ItemGroup>
+	  <None Remove="icon.png" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\LoggerVisualizerSource\LoggerVisualizerSource.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Elmah.Io.Client" Version="5.1.76" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Extensibility.Sdk" Version="17.11.40261" />
+		<PackageReference Include="Microsoft.VisualStudio.Extensibility.Build" Version="17.11.40261" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\LoggerVisualizerSource\LoggerVisualizerSource.csproj" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<Page Remove="LoggerVisualizerUserControl.xaml" />
@@ -27,7 +33,8 @@
 		<Content Include="bin\$(Configuration)\net8.0-windows\Microsoft.Extensions.Logging.dll" Link="netstandard2.0\Microsoft.Extensions.Logging.dll">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
+		<Content Include="icon.png">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
-
-
 </Project>

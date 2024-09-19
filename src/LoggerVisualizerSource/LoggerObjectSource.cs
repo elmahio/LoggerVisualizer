@@ -29,7 +29,7 @@ namespace LoggerVisualizerSource
                     Name = name,
                     MinLevel = minLevel,
                     Enabled = enabled,
-                    Loggers = new System.Collections.Generic.List<Logger>()
+                    Loggers = []
                 };
                 foreach (var l in loggers)
                 {
@@ -41,7 +41,7 @@ namespace LoggerVisualizerSource
                     var providerTypeValue = GetPublicProperty(l, "ProviderType") as Type;
                     var internalLogger = GetPublicProperty(l, "Logger") as ILogger;
                     var messageLogger = FirstOrNull(messageLoggers, internalLogger);
-                    Logger loggerModel = new Logger
+                    Logger loggerModel = new()
                     {
                         Name = providerTypeValue.FullName,
                         ExternalScope = GetPublicProperty(l, "ExternalScope").ToString(),
@@ -113,15 +113,15 @@ namespace LoggerVisualizerSource
                 return null;
             }
 
-            var logLevels = new ReadOnlySpan<LogLevel>(new LogLevel[]
-            {
+            var logLevels = new ReadOnlySpan<LogLevel>(
+            [
                 LogLevel.Critical,
                 LogLevel.Error,
                 LogLevel.Warning,
                 LogLevel.Information,
                 LogLevel.Debug,
                 LogLevel.Trace,
-            });
+            ]);
 
             LogLevel? minimumLevel = null;
 
@@ -147,6 +147,7 @@ namespace LoggerVisualizerSource
             return theValue;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "")]
         private static object GetNonPublicProperty(object obj, string name)
         {
             var propertyInfo = obj.GetType().GetProperty(name, BindingFlags.NonPublic | BindingFlags.Instance);
@@ -155,6 +156,7 @@ namespace LoggerVisualizerSource
             return theValue;
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "")]
         private static object GetPrivateField(object obj, string name)
         {
             FieldInfo fieldInfo = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
