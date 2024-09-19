@@ -48,7 +48,7 @@ namespace LoggerVisualizer
                     Source = baseException.Source,
                     User = WindowsIdentity.GetCurrent().Name,
                     Hostname = Hostname(),
-                    Application = "Exception Visualizer",
+                    Application = "Logger Visualizer",
                     ServerVariables =
                     [
                         new("User-Agent", $"X-ELMAHIO-APPLICATION; OS=Windows; OSVERSION={Environment.OSVersion.Version}; ENGINE=VisualStudio"),
