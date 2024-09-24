@@ -12,8 +12,8 @@ namespace LoggerVisualizer
                 id: "LoggerVisualizer",
                 version: this.ExtensionAssemblyVersion,
                 publisherName: "elmahio",
-                displayName: "ILogger Debugger Visualizer Extension",
-                description: "Logger Debug Visualizer for Visual Studio.")
+                displayName: "ILogger Visualizer",
+                description: "Show a debugger visualizer for ILogger in Visual Studio.")
             {
                 Tags = ["visualizer", "logging", "logger", "ilogger", "debug", "debugging"],
                 Icon = "icon.png",
