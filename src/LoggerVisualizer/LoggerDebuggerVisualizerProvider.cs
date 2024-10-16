@@ -13,7 +13,9 @@ namespace LoggerVisualizer
     internal class LoggerDebuggerVisualizerProvider : DebuggerVisualizerProvider
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("ConstantExpressionEvaluator", "CEE0027:String not localized", Justification = "")]
-        public override DebuggerVisualizerProviderConfiguration DebuggerVisualizerProviderConfiguration => new("Logger Visualizer", typeof(Logger<>))
+        public override DebuggerVisualizerProviderConfiguration DebuggerVisualizerProviderConfiguration => new(
+            new VisualizerTargetType("Logger Visualizer", typeof(Logger<>)),
+            new VisualizerTargetType("Logger Factory Visualizer", typeof(LoggerFactory)))
         {
             VisualizerObjectSourceType = new(typeof(LoggerObjectSource)),
         };

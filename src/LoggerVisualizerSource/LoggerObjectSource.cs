@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.DebuggerVisualizers;
 using System;
+using System.Collections;
 using System.IO;
 using System.Reflection;
 
@@ -10,7 +11,58 @@ namespace LoggerVisualizerSource
     {
         public override void GetData(object target, Stream outgoingData)
         {
-            if (target.GetType().IsGenericType && target.GetType().GetGenericTypeDefinition() == typeof(Logger<>))
+            if (target.GetType() == typeof(LoggerFactory))
+            {
+                var field = GetPrivateField(target, "_providerRegistrations");
+                var result = new LoggerModel
+                {
+                    Loggers = []
+                };
+
+                Type listType = field.GetType();
+                if (typeof(IEnumerable).IsAssignableFrom(listType))
+                {
+                    // Cast the value to IEnumerable to access the elements
+                    IEnumerable list = (IEnumerable)field;
+
+                    foreach (var item in list)
+                    {
+                        var provider = GetPublicField(item, "Provider") as ILoggerProvider;
+                        var providerTypeValue = provider?.GetType();
+
+                        Logger loggerModel = new()
+                        {
+                            Name = providerTypeValue?.FullName,
+                        };
+
+                        switch (provider?.GetType().FullName)
+                        {
+                            case "Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider":
+                                {
+                                    var optionsMonitor = GetPrivateField(provider, "_options");
+                                    var options = GetPublicProperty(optionsMonitor, "CurrentValue");
+                                    loggerModel = ConsoleOptions(options, loggerModel);
+                                    break;
+                                }
+                            case "Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider":
+                                {
+                                    loggerModel = EventLogSettings(provider, loggerModel);
+                                    break;
+                                }
+                            case "Elmah.Io.Extensions.Logging.ElmahIoLoggerProvider":
+                                {
+                                    loggerModel = ElmahIoOptions(provider, loggerModel);
+                                    break;
+                                }
+                        }
+
+                        result.Loggers.Add(loggerModel);
+                    }
+                }
+
+                SerializeAsJson(outgoingData, result);
+            }
+            else if (target.GetType().IsGenericType && target.GetType().GetGenericTypeDefinition() == typeof(Logger<>))
             {
                 var logger = GetPrivateField(target, "_logger") as ILogger;
                 if (logger?.GetType().FullName != "Microsoft.Extensions.Logging.Logger") return;
@@ -53,29 +105,17 @@ namespace LoggerVisualizerSource
                         case "Microsoft.Extensions.Logging.Console.ConsoleLoggerProvider":
                             {
                                 var options = GetNonPublicProperty(internalLogger, "Options");
-                                loggerModel.FormatterName = GetPublicProperty(options, "FormatterName")?.ToString();
-                                loggerModel.TimestampFormat = GetPublicProperty(options, "TimestampFormat")?.ToString();
-                                loggerModel.QueueFullMode = GetPublicProperty(options, "QueueFullMode")?.ToString();
-                                loggerModel.DisableColors = GetPublicProperty(options, "DisableColors")?.ToString();
-                                loggerModel.LogToStandardErrorThreshold = GetPublicProperty(options, "LogToStandardErrorThreshold")?.ToString();
-                                loggerModel.MaxQueueLength = GetPublicProperty(options, "MaxQueueLength")?.ToString();
-                                loggerModel.UseUtcTimestamp = GetPublicProperty(options, "UseUtcTimestamp")?.ToString();
+                                loggerModel = ConsoleOptions(options, loggerModel);
                                 break;
                             }
                         case "Microsoft.Extensions.Logging.EventLog.EventLogLoggerProvider":
                             {
-                                var settings = GetPrivateField(internalLogger, "_settings");
-                                loggerModel.LogName = GetPublicProperty(settings, "LogName")?.ToString();
-                                loggerModel.MachineName = GetPublicProperty(settings, "MachineName")?.ToString();
-                                loggerModel.SourceName = GetPublicProperty(settings, "SourceName")?.ToString();
+                                loggerModel = EventLogSettings(internalLogger, loggerModel);
                                 break;
                             }
                         case "Elmah.Io.Extensions.Logging.ElmahIoLoggerProvider":
                             {
-                                var options = GetPrivateField(internalLogger, "_options");
-                                loggerModel.ApiKey = GetPublicProperty(options, "ApiKey")?.ToString();
-                                var logId = GetPublicProperty(options, "LogId") as Guid?;
-                                loggerModel.LogId = logId == Guid.Empty ? "" : logId?.ToString();
+                                loggerModel = ElmahIoOptions(internalLogger, loggerModel);
                                 break;
                             }
                     }
@@ -85,6 +125,36 @@ namespace LoggerVisualizerSource
 
                 SerializeAsJson(outgoingData, result);
             }
+        }
+
+        private Logger ElmahIoOptions(object objWithOptions, Logger loggerModel)
+        {
+            var options = GetPrivateField(objWithOptions, "_options");
+            loggerModel.ApiKey = GetPublicProperty(options, "ApiKey")?.ToString();
+            var logId = GetPublicProperty(options, "LogId") as Guid?;
+            loggerModel.LogId = logId == Guid.Empty ? "" : logId?.ToString();
+            return loggerModel;
+        }
+
+        private Logger EventLogSettings(object objWithSettings, Logger loggerModel)
+        {
+            var settings = GetPrivateField(objWithSettings, "_settings");
+            loggerModel.LogName = GetPublicProperty(settings, "LogName")?.ToString();
+            loggerModel.MachineName = GetPublicProperty(settings, "MachineName")?.ToString();
+            loggerModel.SourceName = GetPublicProperty(settings, "SourceName")?.ToString();
+            return loggerModel;
+        }
+
+        private Logger ConsoleOptions(object options, Logger loggerModel)
+        {
+            loggerModel.FormatterName = GetPublicProperty(options, "FormatterName")?.ToString();
+            loggerModel.TimestampFormat = GetPublicProperty(options, "TimestampFormat")?.ToString();
+            loggerModel.QueueFullMode = GetPublicProperty(options, "QueueFullMode")?.ToString();
+            loggerModel.DisableColors = GetPublicProperty(options, "DisableColors")?.ToString();
+            loggerModel.LogToStandardErrorThreshold = GetPublicProperty(options, "LogToStandardErrorThreshold")?.ToString();
+            loggerModel.MaxQueueLength = GetPublicProperty(options, "MaxQueueLength")?.ToString();
+            loggerModel.UseUtcTimestamp = GetPublicProperty(options, "UseUtcTimestamp")?.ToString();
+            return loggerModel;
         }
 
         static object FirstOrNull(Array messageLoggers, ILogger logger)
@@ -160,6 +230,15 @@ namespace LoggerVisualizerSource
         private static object GetPrivateField(object obj, string name)
         {
             FieldInfo fieldInfo = obj.GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+            if (fieldInfo == null) return null;
+            var theValue = fieldInfo.GetValue(obj);
+            return theValue;
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields", Justification = "")]
+        private static object GetPublicField(object obj, string name)
+        {
+            FieldInfo fieldInfo = obj.GetType().GetField(name, BindingFlags.Public | BindingFlags.Instance);
             if (fieldInfo == null) return null;
             var theValue = fieldInfo.GetValue(obj);
             return theValue;
