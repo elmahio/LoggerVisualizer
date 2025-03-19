@@ -62,10 +62,14 @@ namespace LoggerVisualizerSource
 
                 SerializeAsJson(outgoingData, result);
             }
-            else if (target.GetType().IsGenericType && target.GetType().GetGenericTypeDefinition() == typeof(Logger<>))
+            else if ((target.GetType().IsGenericType && target.GetType().GetGenericTypeDefinition() == typeof(Logger<>))
+                || target.GetType().FullName == "Microsoft.Extensions.Logging.Logger")
             {
-                var logger = GetPrivateField(target, "_logger") as ILogger;
-                if (logger?.GetType().FullName != "Microsoft.Extensions.Logging.Logger") return;
+                ILogger logger = target.GetType().FullName == "Microsoft.Extensions.Logging.Logger"
+                    ? target as ILogger
+                    : GetPrivateField(target, "_logger") as ILogger;
+
+                if (logger == null) return;
 
                 var loggers = GetPublicProperty(logger, "Loggers") as Array;
                 var messageLoggers = GetPublicProperty(logger, "MessageLoggers") as Array;
