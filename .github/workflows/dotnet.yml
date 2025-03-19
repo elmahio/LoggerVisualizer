@@ -20,7 +20,7 @@ jobs:
     - name: Update version
       run: |
         (Get-Content -Path src\LoggerVisualizer\LoggerVisualizer.csproj) |
-          ForEach-Object {$_ -Replace '<AssemblyVersion>0.1.0</AssemblyVersion>', '<AssemblyVersion>0.1.${{ github.run_number }}</AssemblyVersion>'} |
+          ForEach-Object {$_ -Replace '<AssemblyVersion>0.1.0</AssemblyVersion>', '<AssemblyVersion>0.2.${{ github.run_number }}</AssemblyVersion>'} |
             Set-Content -Path src\LoggerVisualizer\LoggerVisualizer.csproj
     - name: Restore
       run: nuget restore
@@ -37,8 +37,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
       with:
-        tag_name: 0.1.${{ github.run_number }}
-        release_name: Release 0.1.${{ github.run_number }}
+        tag_name: 0.2.${{ github.run_number }}
+        release_name: Release 0.2.${{ github.run_number }}
         draft: false
     - name: Upload VSIX
       if: ${{ github.event_name == 'push' }}
